@@ -1,14 +1,5 @@
-import speech_recognition as sr
-from threading import Thread
-# from queue import Queue
 from tkinter import *
 from time import *
-import pyaudio
-import wave
-
-
-
-
 
 class App:
     
