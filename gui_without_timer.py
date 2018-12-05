@@ -9,7 +9,7 @@ import pickle
 import os
 
 classes = list(pickle.load(open('labels_classes.pkl', 'rb')))
-model = load_model('weights_2/model-ep016-loss0.077-val_loss0.929.h5')
+model = load_model('model-ep016-loss0.077-val_loss0.929.h5')
 maxLength = 32
 
 class App:
