@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 from time import *
 import pyaudio
 import wave
@@ -24,8 +25,13 @@ class App:
 
         self.botLabel = Label(text="Bot").place(x = 45,y = 40)
         self.userLabel = Label(text="User").place(x = 35,y = 75)
-        self.timeDisp = Label(text=" ")
+#        self.timeDisp = Label(text=" ")
+#        self.timeDisp.place(x=100,y=150)
+        
+        self.timeDisp = Entry(text=" ")
         self.timeDisp.place(x=100,y=150)
+        self.timeDisp.configure(state=DISABLED)
+        
 
         self.botResponse = Entry()
         self.botResponse.place(x = 100,y = 40)    
@@ -43,27 +49,42 @@ class App:
     def startRecord(self):    
         self.startTime = strftime("%S")
         self.diff = 0
-        if self.btnCount == 0:        
-            self.timeDisp.configure(text="Recording ...")            
-            print("Recording ...")
-            self.recordBtn.configure(state=DISABLED)            
-            self.root.after(100,self.middleware(False))
-        else:            
+        if self.btnCount == 0:       
+#            print("Recording ...")
+            self.root.after(200,self.middleware(False))
+        else:
             self.btnCount = 0
-            print("Wait..")
-            self.timeDisp.configure(text="Wait..")
-            self.root.after(2000,self.startRecord)
+#            print("Wait..")
+            self.timeDisp.configure(state=NORMAL)
+            self.timeDisp.delete(0,END)
+            self.timeDisp.insert(0,"Wait ..")
+            self.timeDisp.configure(state=DISABLED)
+            self.root.after(1000,self.startRecord)
 
     def middleware(self,finishRecord):
         if finishRecord:
-            print("finish Recording")
-            self.timeDisp.configure(text="finish Recording")
+#            print("finish Recording")
+            self.timeDisp.configure(state=NORMAL)
+            self.timeDisp.delete(0,END)
+            self.timeDisp.insert(0,"finish Recording")
+            self.timeDisp.configure(state=DISABLED)
+            self.recordBtn.configure(state=NORMAL)
             self.idx += 1
-            self.root.after(100,self.endRecord)
+            self.btnCount += 1
+            self.root.after(500,self.endRecord)
         else:
-            self.root.after(100,self.record)
+            self.timeDisp.configure(state=NORMAL)
+            self.timeDisp.delete(0,END)
+            self.timeDisp.insert(0,"Recording ...")
+            self.timeDisp.configure(state=DISABLED)
+            self.recordBtn.configure(state=DISABLED)
+            self.root.after(500,self.record)
     
     def recognize(self):
+        self.timeDisp.configure(state=NORMAL)
+        self.timeDisp.delete(0,END)
+        self.timeDisp.insert(0," ")
+        self.timeDisp.configure(state=DISABLED)
         wave, sr = librosa.load(self.WAVE_OUTPUT_FILENAME,mono = True, sr = None)
         mfcc = librosa.feature.mfcc(wave, sr = 16000)
         padWidth = maxLength - mfcc.shape[1]
@@ -74,18 +95,20 @@ class App:
         pred = model.predict(mfcc1)
 #        print(np.max(pred))
         pred = int(pred.argmax(axis=-1))
-        print(classes[pred])
-        self.userResponse.configure(text=str(classes[pred]))
+#        print(classes[pred])
+        self.userResponse.delete(0,END)
+        self.userResponse.insert(0,str(classes[pred]))
         if os.path.exists(self.WAVE_OUTPUT_FILENAME):
             os.remove(self.WAVE_OUTPUT_FILENAME)
         else:
           print("The file does not exist")
 
     def endRecord(self):
-        print("{} saved".format(self.WAVE_OUTPUT_FILENAME))
-        self.timeDisp.configure(text="{} saved".format(self.WAVE_OUTPUT_FILENAME))
+        self.timeDisp.configure(state=NORMAL)
+        self.timeDisp.delete(0,END)
+        self.timeDisp.insert(0,"{} saved".format(self.WAVE_OUTPUT_FILENAME))
+        self.timeDisp.configure(state=DISABLED)
         self.recordBtn.configure(state=NORMAL)
-        self.timeDisp.configure(text="")
         self.root.after(100,self.recognize)
 
     def record(self):
